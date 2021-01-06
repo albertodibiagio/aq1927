@@ -7,22 +7,16 @@ use Yii;
 /**
  * This is the model class for table "utenti".
  *
- * @property integer $id
+ * @property BaseModel $baseModel
  * @property string $user_id
  * @property integer $ruolo
  * @property string $nome
  * @property string $cognome
- * @property string $email
- * @property integer $id_ufficio_gestore
- * @property integer $modified_by 
- * @property integer $abilitato 
- * @property integer $tipo
- * @property boolean $arpaauth 
+ * @property string $email 
  * @property string $password
  *
- * @property UfficiGestori $idUfficioGestore
  */
-class Utenti extends \yii\db\ActiveRecord
+class Utenti extends BaseModel
 {
     public $password_repeat; 
 
@@ -35,7 +29,7 @@ class Utenti extends \yii\db\ActiveRecord
     ];
     const RUOLO_SUPERUSER = 1;
     const RUOLO_ADMINISTRATOR = 2;
-    const RUOLO_OPERATORE = 3;
+    const RUOLO_CONTABILITA = 3;
     const RUOLO_LETTURA = 4;
 
     const SCENARIO_APPLICATIVO = 'applicativo';
@@ -57,14 +51,11 @@ class Utenti extends \yii\db\ActiveRecord
             [['password', 'password_repeat', 'id_ufficio_gestore'], 'required', 'on' => self::SCENARIO_APPLICATIVO, 'message' => '{attribute} è un campo obbligatorio'],
             [['nome', 'cognome', 'email'], 'required', 'on' => self::SCENARIO_FRONTEND, 'message' => '{attribute} è un campo obbligatorio'],
             [['ruolo', 'id_ufficio_gestore', 'tipo', 'modified_by', 'abilitato'], 'integer'],
-            [['arpaauth'], 'boolean'],
             [['user_id'], 'string', 'max' => 100],
             [['nome', 'cognome', 'password'], 'string', 'max' => 255],
             [['email'], 'email', 'message' => 'Il campo Email deve essere di formato e-mail'],
             [['user_id', 'email'], 'unique'],
-            ['tipo', 'in', 'range' => [1, 2]],//check if tipo is 1: utenza di front-end 2: utenza applicativa 
             ['password_repeat', 'compare', 'compareAttribute'=>'password', 'message'=>"Le password non coincidono" ],
-            [['id_ufficio_gestore'], 'exist', 'skipOnError' => true, 'targetClass' => UfficiGestori::className(), 'targetAttribute' => ['id_ufficio_gestore' => 'id']],
         ];
     }
 
@@ -74,30 +65,14 @@ class Utenti extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         $labalsBase = [
-            'id' => 'ID',
             'user_id' => 'Nome Utente',
             'ruolo' => 'Ruolo',
             'password' => 'Password',
             'password_repeat' => 'Ripeti Password',
-            'id_ufficio_gestore' => 'Ufficio Gestore',
-            'modified_by' => 'Modificato da',
-            'abilitato' => 'Abilitato',
+            'nome' => 'Nome',
+            'cognome' => 'Cognome',
+            'email' => 'Email',
         ];
-        if($this->scenario == self::SCENARIO_APPLICATIVO){
-            $arrLabelsScenario = [
-                'nome' => 'Nome Referente',
-                'cognome' => 'Cognome Referente',
-                'email' => 'Email Referente',
-            ];
-        }
-        else{
-            $arrLabelsScenario = [
-                'nome' => 'Nome',
-                'cognome' => 'Cognome',
-                'email' => 'Email',
-                'arpaauth' => 'Autenticazione ARPA'
-            ];
-        }
         $arrLabels = array_merge($labalsBase, $arrLabelsScenario);
         return $arrLabels;
     }
